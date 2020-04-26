@@ -1,0 +1,6 @@
+*.tsv
+*.csv
+venv/
+.idea/
+.DS*
+*pickle
