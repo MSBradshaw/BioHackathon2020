@@ -24,7 +24,8 @@ rf.fit(X, y)
 sgd.fit(X, y)
 pac.fit(X, y)
 
-p_data = pd.read_csv('potentially_fake.tsv', sep='\t')
+# p_data = pd.read_csv('potentially_fake.tsv', sep='\t')
+p_data = pd.read_csv('potentially_fake-8000.tsv', sep='\t')
 p_abstracts = [BeautifulSoup(x).get_text() for x in p_data['abstract']]
 fake_indexes = []
 for index in range(len(p_abstracts)):
@@ -36,7 +37,21 @@ for index in range(len(p_abstracts)):
         fake_indexes.append(index)
         print('Fake!')
 
-p_data.loc[fake_indexes].to_csv('38_predicted_fake.csv')
+p_data.loc[fake_indexes].to_csv('115_predicted_fake.csv')
+
+
+ids = []
+for line in open('download_data/fake_pmids.txt'):
+    ids.append(line[5:].strip())
+    print(line[5:])
+
+newids = [x for x in list(p_data.loc[fake_indexes]['pmid']) if str(x) not in ids]
+
+p_data.index = p_data['pmid']
+
+p_data[newids]
+
+oldids = [x for x in list(p_data.loc[fake_indexes]['pmid']) if x in ids]
 
 #-----------
 #-----------

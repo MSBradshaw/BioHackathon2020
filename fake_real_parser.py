@@ -60,7 +60,7 @@ def get_authors(text):
 
 
 def get_df(path):
-    data = {'title': [], 'authors': [], 'year': [], 'month': [], 'day': [], 'month': [], 'journal': [], 'abstract': []}
+    data = {'pmid':[],'title': [], 'authors': [], 'year': [], 'month': [], 'day': [], 'month': [], 'journal': [], 'abstract': []}
 
     for file in os.listdir(path):
         text = ''
@@ -87,6 +87,7 @@ def get_df(path):
             data['authors'].append(authors)
             for key in temp_dic:
                 data[key].append(temp_dic[key])
+            data['pmid'].append(file.strip())
     return pd.DataFrame(data)
 
 df_fake = get_df('/Users/michael/Downloads/PMID/')
@@ -99,3 +100,6 @@ df.to_csv('real_and_fake.tsv', sep='\t')
 
 potential = get_df('/Users/michael/Downloads/20200426_potential_fakes_dataset/')
 potential.to_csv('potentially_fake.tsv', sep='\t')
+
+potential_big = get_df('/Users/michael/Downloads/larger_set/')
+potential_big.to_csv('potentially_fake-8000.tsv', sep='\t')
