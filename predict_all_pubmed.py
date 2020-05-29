@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn.feature_extraction.text import TfidfTransformer
+import sys
+import pickle
 
 data = pd.read_csv('dataset.csv')
 abstracts = [BeautifulSoup(x).get_text() for x in data['abstract']]
@@ -24,12 +26,22 @@ rf.fit(X, y)
 sgd.fit(X, y)
 pac.fit(X, y)
 
-# p_data = pd.read_csv('potentially_fake.tsv', sep='\t')
-p_data = pd.read_csv('potentially_fake-8000.tsv', sep='\t')
 
-p_abstracts = [BeautifulSoup(x).get_text() for x in p_data['abstract']]
+p_data = pd.read_csv(sys.argv[1], sep='\n', header=None)
+p_data = p_data[0].str.split('\t', expand=True)
+
+
+columns = ['pmid','authors','year','journal','year','abstract']
+p_data.columns = columns
+
+abstract_list = [x if x is not None else '' for x in p_data['abstract']]
+p_abstracts = [BeautifulSoup(x).get_text() for x in abstract_list]
+
 fake_indexes = []
 for index in range(len(p_abstracts)):
+    if p_abstracts[index] == '':
+        print(str(index) + ' skipping')
+        continue
     tfidf_pred = TfidfVectorizer(vocabulary=tfidf.vocabulary_)
     p_x = tfidf_pred.fit_transform([p_abstracts[index]])
     predictions = [support_vec.predict(p_x)[0], rf.predict(p_x)[0], sgd.predict(p_x)[0], pac.predict(p_x)[0]]
@@ -42,16 +54,17 @@ for index in range(len(p_abstracts)):
 
 # p_data.loc[fake_indexes].to_csv('115_predicted_fake.csv')
 
-
+print('doing ids')
 ids = []
 for line in open('download_data/fake_pmids.txt'):
-    ids.append(line[5:].strip())
-    print(line[5:])
+    ids.append(line.strip())
+    print(line.strip())
 
 newids = [x for x in list(p_data.loc[fake_indexes]['pmid']) if str(x) not in ids]
 
 print('Potentially Fake PMIDs:')
-with open('new_potentially_fake_pmids.txt','w') as outfile:
+with open('new_potentially_fake_pmids-' + sys.argv[1] + '.txt','w') as outfile:
+    outfile.write('New Fake IDs\n')
     for i in newids:
-        outfile.write(str(newids[i]) + '\n')
+        outfile.write(str(i) + '\n')
         print(i)

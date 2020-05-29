@@ -4,3 +4,6 @@ venv/
 .idea/
 .DS*
 *pickle
+PredictedFakes/
+downloaddata.zip
+*.txt
